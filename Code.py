@@ -5,9 +5,8 @@ from typing import List, Optional, Tuple, TextIO
 
 import numpy as np
 
-from permutation_distance import (
-    compute_permutation_distance,
-)
+from permutation_distance import compute_permutation_distance
+from tsplib_distance import tsplib_distance_matrix
 
 from setup_initial_solution import setup_initial_solution
 from perturbation_schemes import neighborhood_gen
@@ -21,8 +20,8 @@ def solve_tsp_local_search(
     x0: Optional[List[int]] = None,
     perturbation_scheme: str = "two_opt",
     max_processing_time: Optional[float] = None,
-    log_file: Optional[str] = None,
-    verbose: bool = False,
+    log_file: Optional[str] = "False",
+    verbose: bool = True,
 ) -> Tuple[List, float]:
     """Solve a TSP problem with a local search heuristic
 
@@ -110,3 +109,9 @@ def _print_message(
 
     if verbose:
         print(msg)
+
+tsplib_file = "a280.tsp"
+distance_matrix = tsplib_distance_matrix(tsplib_file)
+
+# Solve with Local Search using default parameters
+permutation, distance = solve_tsp_local_search(distance_matrix)
