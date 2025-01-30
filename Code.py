@@ -80,6 +80,7 @@ def solve_tsp_local_search(
 
     t0 = time.time()
     loopCount = 0
+    # caminho.append(int(f"{fx}"))
 
     while improvement and (not stop_early):
         improvement = False
@@ -93,10 +94,9 @@ def solve_tsp_local_search(
             t1 = time.time()
             loopCount += 1
             if(t1-t0 >= 1.0):
-                print(loopCount)
                 inte.append(loopCount)
                 loopCount = 0
-                caminho.append(f"{fx}")
+                caminho.append(int(f"{fx}"))
                 t0 = time.time()
 
 
@@ -126,6 +126,7 @@ def _print_message(
         print(msg)
 
 tsplib_file = "a280.tsp"
+# tsplib_file = "brazil58.tsp"
 distance_matrix = tsplib_distance_matrix(tsplib_file)
 
 # distance_matrix = np.array([
@@ -142,9 +143,28 @@ total_sum = 0
 for val in inte:
     total_sum += val
 
+def normalize(arr, t_min, t_max):
+    norm_arr = []
+    diff = t_max - t_min
+    diff_arr = max(arr) - min(arr)    
+    for i in arr:
+        temp = (((i - min(arr))*diff)/diff_arr) + t_min
+        norm_arr.append(temp)
+    return norm_arr
+
 print()
 print("Caminho Encontrado: " + str(permutation))
 print()
 print("Distancia encontrada: " + str(distance))
 print()
-print("Média de interações por 1s: " + str(int(total_sum/ len(inte))))
+if(len(inte) != 0):
+    print("Média de interações a cada 1s: " + str(int(total_sum/ len(inte))))
+    print()
+    print("Melhorias de caminho a cada 1s: " + str(caminho))
+
+    invertido =  []
+    for val in normalize(caminho,0,1):
+        invertido.append(round(abs(1 - val), 3))
+
+    print()
+    print("Dentro do conjunto de melhorias, proximidade ao valor final: " + str(invertido))
