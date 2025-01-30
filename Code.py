@@ -2,6 +2,7 @@
 
 from timeit import default_timer
 from typing import List, Optional, Tuple, TextIO
+import time
 
 import numpy as np
 
@@ -20,7 +21,7 @@ def solve_tsp_local_search(
     x0: Optional[List[int]] = None,
     perturbation_scheme: str = "two_opt",
     max_processing_time: Optional[float] = None,
-    log_file: Optional[str] = "False",
+    log_file: Optional[str] = "None",
     verbose: bool = True,
 ) -> Tuple[List, float]:
     """Solve a TSP problem with a local search heuristic
@@ -77,6 +78,9 @@ def solve_tsp_local_search(
     stop_early = False
     improvement = True
 
+    t0 = time.time()
+    loopCount = 0
+
     while improvement and (not stop_early):
         improvement = False
         for n_index, xn in enumerate(neighborhood_gen[perturbation_scheme](x)):
@@ -84,10 +88,19 @@ def solve_tsp_local_search(
                 _print_message(TIME_LIMIT_MSG, verbose, log_file_handler)
                 stop_early = True
                 break
-
+            
             fn = compute_permutation_distance(distance_matrix, xn)
+            t1 = time.time()
+            loopCount += 1
+            if(t1-t0 >= 1.0):
+                print(loopCount)
+                inte.append(loopCount)
+                loopCount = 0
+                caminho.append(f"{fx}")
+                t0 = time.time()
 
-            msg = f"Current value: {fx}; Neighbor: {n_index}"
+
+            msg = f"Valor atual: {fx}; Nó: {n_index}"
             _print_message(msg, verbose, log_file_handler)
 
             if fn < fx:
@@ -100,6 +113,8 @@ def solve_tsp_local_search(
 
     return x, fx
 
+inte = []
+caminho = []
 
 def _print_message(
     msg: str, verbose: bool, log_file_handler: Optional[TextIO]
@@ -113,5 +128,23 @@ def _print_message(
 tsplib_file = "a280.tsp"
 distance_matrix = tsplib_distance_matrix(tsplib_file)
 
+# distance_matrix = np.array([
+#     [0,  5, 4, 10],
+#     [5,  0, 8,  5],
+#     [4,  8, 0,  3],
+#     [10, 5, 3,  0]
+# ])
+
 # Solve with Local Search using default parameters
 permutation, distance = solve_tsp_local_search(distance_matrix)
+
+total_sum = 0
+for val in inte:
+    total_sum += val
+
+print()
+print("Caminho Encontrado: " + str(permutation))
+print()
+print("Distancia encontrada: " + str(distance))
+print()
+print("Média de interações por 1s: " + str(int(total_sum/ len(inte))))
